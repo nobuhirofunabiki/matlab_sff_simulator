@@ -1,5 +1,16 @@
+file_name:
+  initial_states: 'test.csv'
+  mesh_network: 'time_data_transfer.csv'
 
 time:
   total_simulation: 3
   delta_runge_kutta: 0.01
   display_period: 10.0
+
+dynamics:
+  dimension: 3
+
+reference_agent:
+  initial_state:
+    position: [0, 0, 0]
+    velocity: [0, 0, 0]

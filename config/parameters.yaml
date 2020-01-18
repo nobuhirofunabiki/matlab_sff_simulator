@@ -3,7 +3,7 @@ file_name:
   mesh_network: 'time_data_transfer.csv'
 
 time:
-  total_simulation: 3000
+  total_simulation: 30
   delta_runge_kutta: 1
   display_period: 10.0
 
@@ -12,6 +12,9 @@ dynamics:
   disturbance_sigma: [0, 0, 0]
   hill: 
     angular_rate: 1.107E-03
+
+network:
+  range_threshold: 1500
 
 reference_agent:
   initial_state:

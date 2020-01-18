@@ -23,6 +23,11 @@ args_target_ref.marker_face_color = color_list.ref;
 args_target_ref.txt = 'ref(0)';
 v_agent_ref_.visualizeAgentTrajectoryCustomized(args_ref_trajectory);
 plot_ref =v_agent_ref_.visualizeAgentPositionCustomized(num_steps, args_target_ref);
+% Network
+args_v_network.line_color = color_generator_.getNormalizedRGB('nezumi');
+args_v_network.line_style = '-';
+args_v_network.line_width = 0.05;
+network_.visualizeConnectedNetwork3DCustomized(args_v_network);
 axis equal
 grid on
 ax = gca;

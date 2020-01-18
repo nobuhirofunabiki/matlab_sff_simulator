@@ -11,11 +11,13 @@ close all;
 restoredefaultpath
 addpath(genpath('../matlab_agent_handler'));
 addpath(genpath('../dynamics_model'));
+addpath(genpath('../matlab_network_manager'));
 addpath(genpath('../matlab_visualizer'));
 addpath(genpath('../common_utilities'));
 addpath(genpath('../YAMLMatlab_0.4.3'));
 
 run('src/load_parameters.m');
+
 
 %% Instanciation
 
@@ -34,10 +36,8 @@ end
 
 % Reference agent
 args_agent_ref.id = 0;
-for iDims = 1:num_dims
-    args_agent_ref.position(iDims, 1) = init_state_ref.position(iDims);
-    args_agent_ref.velocity(iDims, 1) = init_state_ref.velocity(iDims);
-end
+args_agent_ref.position = init_state_ref.position;
+args_agent_ref.velocity = init_state_ref.velocity;
 agent_ref_ = AgentHandler(args_agent_ref);
 
 % Dynamics model
@@ -46,6 +46,18 @@ args_dynamics.disturbance   = disturbance_sigma;
 args_dynamics.delta_time_rk = delta_time_rk;
 args_dynamics.angular_rate  = angular_rate;
 dynamics_ = HillDynamics3D(args_dynamics);
+
+% Network manager
+node_positions = zeros(num_dims, num_agents);
+for iAgents = 1:num_agents
+    node_positions(:,iAgents) = agents_true_(iAgents).getPosition();
+end
+args_network.range_threshold        = range_threshold;
+args_network.num_nodes_nonref       = num_agents;
+args_network.node_positions_nonref  = node_positions;
+args_network.node_position_ref      = agent_ref_.getPosition();
+network_ = NetworkManagerWithReferenceNode(args_network);
+network_.updateAdjacentMatrixByRange();
 
 % Visualizers
 args_visualizer.memory_size = num_steps;
@@ -59,8 +71,8 @@ v_agent_ref_ = AgentVisualizer3D(args_visualizer);
 % Control input
 control_input = zeros(num_dims, 1);
 
-%% Simulation
 
+%% Simulation
 for iSteps = 1:num_steps
 
     % Visualization
@@ -70,6 +82,16 @@ for iSteps = 1:num_steps
         v_agents_true_(iAgents).setPosition(position_true, iSteps);
     end
 
+    % Update Network
+    node_positions = zeros(num_dims, num_agents);
+    for iAgents = 1:num_agents
+        node_positions(:,iAgents) = agents_true_(iAgents).getPosition();
+    end
+    position_ref = agent_ref_.getPosition();
+    network_.setNodePositions(node_positions, position_ref);
+    network_.updateAdjacentMatrixByRange();
+
+    % Timer
     time_stamp = time_stamp + delta_time_rk;
     time_list(1,iSteps) = time_stamp;
     display_timer = display_timer + delta_time_rk;

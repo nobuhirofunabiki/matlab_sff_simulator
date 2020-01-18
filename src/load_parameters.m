@@ -20,5 +20,9 @@ num_dims = params.dynamics.dimension;
 disturbance_sigma = transpose(cell2mat(params.dynamics.disturbance_sigma));
 angular_rate = params.dynamics.hill.angular_rate;
 
+% Communication network
+range_threshold = params.network.range_threshold;
+
 % Rerence agent
-init_state_ref = params.reference_agent.initial_state;
+init_state_ref.position = transpose(cell2mat(params.reference_agent.initial_state.position));
+init_state_ref.velocity = transpose(cell2mat(params.reference_agent.initial_state.velocity));

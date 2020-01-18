@@ -12,6 +12,7 @@ restoredefaultpath
 addpath(genpath('../matlab_agent_handler'));
 addpath(genpath('../dynamics_model'));
 addpath(genpath('../matlab_visualizer'));
+addpath(genpath('../common_utilities'));
 addpath(genpath('../YAMLMatlab_0.4.3'));
 
 run('src/load_parameters.m');
@@ -86,3 +87,7 @@ for iSteps = 1:num_steps
     end
 
 end
+
+
+%% Visualization
+run('src/visualization/viz_main.m');

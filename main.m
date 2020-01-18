@@ -11,6 +11,7 @@ close all;
 restoredefaultpath
 addpath(genpath('../matlab_agent_handler'));
 addpath(genpath('../dynamics_model'));
+addpath(genpath('../matlab_visualizer'));
 addpath(genpath('../YAMLMatlab_0.4.3'));
 
 run('src/load_parameters.m');
@@ -39,6 +40,19 @@ end
 agent_ref_ = AgentHandler(args_agent_ref);
 
 % Dynamics model
+args_dynamics.discrete_time = delta_time_rk;
+args_dynamics.disturbance   = disturbance_sigma;
+args_dynamics.delta_time_rk = delta_time_rk;
+args_dynamics.angular_rate  = angular_rate;
+dynamics_ = HillDynamics3D(args_dynamics);
 
+% Visualizers
+args_visualizer.memory_size = num_steps;
+% Visualization: True states
+for iAgents = 1:num_agents
+    v_agents_true_(iAgents) = AgentVisualizer3D(args_visualizer);
+end
+% Visualization: Reference agent
+v_agent_ref_ = AgentVisualizer3D(args_visualizer);
 
 %% Simulation

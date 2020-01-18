@@ -9,6 +9,9 @@ time:
 
 dynamics:
   dimension: 3
+  disturbance_sigma: [0, 0, 0]
+  hill: 
+    angular_rate: 1.107E-03
 
 reference_agent:
   initial_state:

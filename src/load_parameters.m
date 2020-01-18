@@ -17,6 +17,8 @@ num_steps               = round(total_simulation_time/delta_time_rk);
 
 % Dynamics parameters
 num_dims = params.dynamics.dimension;
+disturbance_sigma = transpose(cell2mat(params.dynamics.disturbance_sigma));
+angular_rate = params.dynamics.hill.angular_rate;
 
 % Rerence agent
 init_state_ref = params.reference_agent.initial_state;

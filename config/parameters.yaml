@@ -4,7 +4,7 @@ file_name:
 
 time:
   total_simulation: 3
-  delta_runge_kutta: 0.01
+  delta_runge_kutta: 0.1
   display_period: 10.0
 
 dynamics:

@@ -28,7 +28,7 @@ for iAgents = 1:num_agents
     args_agent_true.id = iAgents;
     args_agent_true.position = initial_states(1:num_dims, iAgents);
     args_agent_true.velocity = initial_states(1+num_dims:2*num_dims, iAgents);
-    agents_(iAgents) = AgentHandler(args_agent_true);
+    agents_true_(iAgents) = AgentHandler(args_agent_true);
 end
 
 % Reference agent
@@ -55,4 +55,34 @@ end
 % Visualization: Reference agent
 v_agent_ref_ = AgentVisualizer3D(args_visualizer);
 
+% Control input
+control_input = zeros(num_dims, 1);
+
 %% Simulation
+
+for iSteps = 1:num_steps
+
+    % Visualization
+    % Visualization: True states
+    for iAgents = 1:num_agents
+        position_true = agents_true_(iAgents).getPosition();
+        v_agents_true_(iAgents).setPosition(position_true, iSteps);
+    end
+
+    time_stamp = time_stamp + delta_time_rk;
+    time_list(1,iSteps) = time_stamp;
+    display_timer = display_timer + delta_time_rk;
+    if (display_timer >= display_period)
+        disp(time_stamp);
+        display_timer = 0;
+    end
+
+    % Propagation
+    % Propagate the true state of agent by Runge-Kutta
+    for iAgents = 1:num_agents
+        output_true = dynamics_.propagatePositionRungeKutta(...
+            agents_true_(iAgents).getPosition(), agents_true_(iAgents).getVelocity(), control_input);
+        agents_true_(iAgents).setPositionVelocity(output_true);       
+    end
+
+end

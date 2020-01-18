@@ -1,0 +1,5 @@
+
+time:
+  total_simulation: 3
+  delta_runge_kutta: 0.01
+  display_period: 10.0

@@ -134,12 +134,16 @@ for iAgents = 1:num_agents
 end
 
 % Estimation Performance Analysis
+args_analysis.num_agents       = num_agents;
+args_analysis.memory_size      = num_steps;
+args_analysis.num_dimensions   = num_dims;
+args_analysis.chi2             = chi2inv(0.99, (2*num_dims)*num_agents);
 % Analysis: Centralized Extended Information Filter
-args_analysis_ceif.num_agents       = num_agents;
-args_analysis_ceif.memory_size      = num_steps;
-args_analysis_ceif.num_dimensions   = num_dims;
-args_analysis_ceif.chi2             = chi2inv(0.99, (2*num_dims)*num_agents);
-analysis_ceif_ = MultiEstimationAnalysisVisualizer(args_analysis_ceif);
+analysis_ceif_ = MultiEstimationAnalysisVisualizer(args_analysis);
+% Analysis: Decentralized Extended Information Filter
+for iAgents = 1:num_agents
+    analysis_deif_(iAgents) = MultiEstimationAnalysisVisualizer(args_analysis);
+end
 
 % Control input
 control_input = zeros(num_dims, 1);
@@ -179,6 +183,17 @@ for iSteps = 1:num_steps
         analysis_ceif_.setEstimateErrorVelocityScalar(iAgents, ...
             agents_true_(iAgents).getVelocity(), ...
             agents_ceif_(iAgents).getVelocity(), iSteps);
+    end
+    % Analysis: Decentralized Extended Information Filter
+    for iAgents = 1:num_agents
+        for jAgents = 1:num_agents
+            analysis_deif_(iAgents).setEstimateErrorPositionScalar(jAgents, ...
+                agents_true_(jAgents).getPosition(), ...
+                agents_deif_(iAgents).getAgentPosition(jAgents), iSteps);
+            analysis_deif_(iAgents).setEstimateErrorVelocityScalar(jAgents, ...
+                agents_true_(jAgents).getVelocity(), ...
+                agents_deif_(iAgents).getAgentVelocity(jAgents), iSteps);
+        end
     end
 
     % Update Network

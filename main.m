@@ -11,6 +11,7 @@ close all;
 restoredefaultpath
 addpath(genpath('../matlab_agent_handler'));
 addpath(genpath('../dynamics_model'));
+addpath(genpath('../sensor_model'));
 addpath(genpath('../matlab_network_manager'));
 addpath(genpath('../matlab_visualizer'));
 addpath(genpath('../common_utilities'));
@@ -25,6 +26,8 @@ run('src/load_parameters.m');
 time_stamp      = 0.0;
 time_list       = zeros(1,num_steps);
 display_timer   = 0.0;
+num_vars        = 2*num_dims*num_agents;
+num_edges       = nchoosek(num_agents, 2) + num_agents;
 
 % True states
 for iAgents = 1:num_agents
@@ -73,6 +76,14 @@ network_.updateAdjacentMatrixByRange();
 % Communication time
 iTimeTableRows = 1;
 estimation_period = sum(comm_time_table(iTimeTableRows,2:num_agents));
+
+% Sensor models
+args_range_sensor.noise_sigma       = sensor_params.range.noise_sigma;
+args_range_sensor.num_measures      = num_edges;
+args_range_sensor.num_variables     = num_vars;
+args_range_sensor.num_agents        = num_agents;
+args_range_sensor.num_dimensions    = num_dims;
+range_sensor_ = RangeMeasurementMultiAgentWithReference(args_range_sensor);
 
 % Estimators
 estimate_timer = 0.0;
@@ -130,6 +141,18 @@ for iSteps = 1:num_steps
 
     % Estimation Sequence
     if (estimate_timer >= estimation_period || iSteps == 1)
+        
+        % Sensor measurments
+        true_positions = zeros(num_dims*num_agents, 1);
+        for iAgents = 1:num_agents
+            position = agents_true_(iAgents).getPosition();
+            true_positions(num_dims*(iAgents-1)+1:num_dims*iAgents) = position;
+        end
+        position_ref = agent_ref_.getPosition();
+        % Range measurements
+        range_sensor_.computeMeasurementVector(true_positions, position_ref, true);
+        measurements.ranges = range_sensor_.getMeasurements();
+
         estimate_timer = 0.0;
     end
     estimate_timer = estimate_timer + delta_time_rk;

@@ -23,6 +23,9 @@ angular_rate = params.dynamics.hill.angular_rate;
 % Communication network
 range_threshold = params.network.range_threshold;
 
+% Sensors
+sensor_params = params.sensor;
+
 % Rerence agent
 init_state_ref.position = transpose(cell2mat(params.reference_agent.initial_state.position));
 init_state_ref.velocity = transpose(cell2mat(params.reference_agent.initial_state.velocity));

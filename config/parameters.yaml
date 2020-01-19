@@ -14,7 +14,11 @@ dynamics:
     angular_rate: 1.107E-03
 
 network:
-  range_threshold: 1500
+  range_threshold: 15000
+
+sensor:
+  range:
+    noise_sigma: 0.10
 
 reference_agent:
   initial_state:

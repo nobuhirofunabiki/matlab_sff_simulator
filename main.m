@@ -48,13 +48,20 @@ agent_ref_ = AgentHandler(args_agent_ref);
 % Estimated states
 initial_states_estimate = makeInitialEstimate(...
     num_dims, initial_states, initial_estimate_sigma.position, initial_estimate_sigma.velocity, 0.0, 0.0);
-% Estimated states (Centralized Extended Information Filter)
+% Estimated states: Centralized Extended Information Filter
 for iAgents = 1:num_agents
     args_est_ceif.id = iAgents;
     args_est_ceif.position = initial_states_estimate(1:num_dims, iAgents);
     args_est_ceif.velocity = initial_states_estimate(1+num_dims:2*num_dims, iAgents);
     agents_ceif_(iAgents) = AgentHandler(args_est_ceif);
 end
+% Estimated states: Decentralized Extended Information Filter
+args_est_deif.num_agents = num_agents;
+args_est_deif.num_dimensions = num_dims;
+for iAgents = 1:num_agents
+    agents_deif_(iAgents) = MultiAgentHandler(args_est_deif, initial_states_estimate);
+end
+
 
 % Dynamics model
 args_dynamics.discrete_time = delta_time_rk;
@@ -119,6 +126,12 @@ v_agent_ref_ = AgentVisualizer3D(args_visualizer);
 for iAgents = 1:num_agents
     v_ceif_(iAgents) =  AgentVisualizer3D(args_visualizer);
 end
+% Visualization: Decentralized Extended Information Filter
+args_multi_visualizer.num_agents = num_agents;
+args_multi_visualizer.memory_size = num_steps;
+for iAgents = 1:num_agents
+    v_deif_(iAgents) = MultiAgentVisualizer3D(args_multi_visualizer);
+end
 
 % Estimation Performance Analysis
 % Analysis: Centralized Extended Information Filter
@@ -148,6 +161,13 @@ for iSteps = 1:num_steps
     for iAgents = 1:num_agents
         position = agents_ceif_(iAgents).getPosition();
         v_ceif_(iAgents).setPosition(position, iSteps);
+    end
+    % Visualization: Decentralized Extended Information Filter
+    for iAgents = 1:num_agents
+        for jAgents = 1:num_agents
+            position = agents_deif_(iAgents).getAgentPosition(jAgents);
+            v_deif_(iAgents).setPosition(jAgents, position, iSteps);
+        end
     end
 
     % Estimation Performance Analysis
@@ -234,6 +254,16 @@ for iSteps = 1:num_steps
         output = dynamics_.propagatePositionRungeKutta(...
             agents_ceif_(iAgents).getPosition(), agents_ceif_(iAgents).getVelocity(), control_input);
         agents_ceif_(iAgents).setPositionVelocity(output);
+    end
+    % Propagation: Decentralized Extended Information Filter
+    for iAgents = 1:num_agents
+        for jAgents = 1:num_agents
+            output = dynamics_.propagatePositionRungeKutta(...
+                agents_deif_(iAgents).getAgentPosition(jAgents), ...
+                agents_deif_(iAgents).getAgentVelocity(jAgents), ...
+                control_input);
+            agents_deif_(iAgents).setAgentPositionVelocity(jAgents, output);
+        end
     end
 
 end

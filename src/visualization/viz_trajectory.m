@@ -23,6 +23,19 @@ args_target_ref.marker_face_color = color_list.ref;
 args_target_ref.txt = 'ref(0)';
 v_agent_ref_.visualizeAgentTrajectoryCustomized(args_ref_trajectory);
 plot_ref =v_agent_ref_.visualizeAgentPositionCustomized(num_steps, args_target_ref);
+% Centralized Extended Information Filter
+args_ceif_trajectory.line_color = color_list.ceif;
+args_ceif_trajectory.line_style = '-';
+args_ceif_trajectory.line_width = 0.3;
+args_ceif_target.marker_symbol = 'o';
+args_ceif_target.marker_size = 30;
+args_ceif_target.marker_edge_color = [0, 0, 0];
+args_ceif_target.marker_face_color = color_list.ceif;
+for iAgents = 1:num_agents
+    args_ceif_target.txt = num2str(iAgents);
+    v_ceif_(iAgents).visualizeAgentTrajectoryCustomized(args_ceif_trajectory);
+    plot_ceif = v_ceif_(iAgents).visualizeAgentPositionCustomized(num_steps, args_ceif_target);
+end
 % Network
 args_v_network.line_color = color_generator_.getNormalizedRGB('nezumi');
 args_v_network.line_style = '-';

@@ -20,3 +20,7 @@ reference_agent:
   initial_state:
     position: [0, 0, 0]
     velocity: [0, 0, 0]
+
+initial_estimate:
+  sigma_position: 100
+  sigma_velocity: 1.0

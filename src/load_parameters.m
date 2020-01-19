@@ -26,3 +26,7 @@ range_threshold = params.network.range_threshold;
 % Rerence agent
 init_state_ref.position = transpose(cell2mat(params.reference_agent.initial_state.position));
 init_state_ref.velocity = transpose(cell2mat(params.reference_agent.initial_state.velocity));
+
+% Initial estimates
+initial_estimate_sigma.position = params.initial_estimate.sigma_position;
+initial_estimate_sigma.velocity = params.initial_estimate.sigma_velocity;

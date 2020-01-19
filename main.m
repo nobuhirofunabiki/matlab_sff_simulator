@@ -120,6 +120,14 @@ for iAgents = 1:num_agents
     v_ceif_(iAgents) =  AgentVisualizer3D(args_visualizer);
 end
 
+% Estimation Performance Analysis
+% Analysis: Centralized Extended Information Filter
+args_analysis_ceif.num_agents       = num_agents;
+args_analysis_ceif.memory_size      = num_steps;
+args_analysis_ceif.num_dimensions   = num_dims;
+args_analysis_ceif.chi2             = chi2inv(0.99, (2*num_dims)*num_agents);
+analysis_ceif_ = MultiEstimationAnalysisVisualizer(args_analysis_ceif);
+
 % Control input
 control_input = zeros(num_dims, 1);
 
@@ -140,6 +148,17 @@ for iSteps = 1:num_steps
     for iAgents = 1:num_agents
         position = agents_ceif_(iAgents).getPosition();
         v_ceif_(iAgents).setPosition(position, iSteps);
+    end
+
+    % Estimation Performance Analysis
+    % Analysis: Centralized Extended Information Filter
+    for iAgents = 1:num_agents
+        analysis_ceif_.setEstimateErrorPositionScalar(iAgents, ...
+            agents_true_(iAgents).getPosition(), ...
+            agents_ceif_(iAgents).getPosition(), iSteps);
+        analysis_ceif_.setEstimateErrorVelocityScalar(iAgents, ...
+            agents_true_(iAgents).getVelocity(), ...
+            agents_ceif_(iAgents).getVelocity(), iSteps);
     end
 
     % Update Network

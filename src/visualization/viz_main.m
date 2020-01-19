@@ -5,3 +5,4 @@ color_list.ref      = color_generator_.getNormalizedRGB('akabeni');
 color_list.ceif     = color_generator_.getNormalizedRGB('ruri');
 
 run('viz_trajectory.m');
+run('viz_estimation_performance.m');

@@ -3,26 +3,26 @@ figure
 args_true_trajectory.line_color = color_list.true;
 args_true_trajectory.line_style = '-';
 args_true_trajectory.line_width = 0.3;
-args_target_true.marker_symbol = 'o';
-args_target_true.marker_size = 30;
-args_target_true.marker_edge_color = [0, 0, 0];
-args_target_true.marker_face_color = color_list.true;
+args_true_target.marker_symbol = 'o';
+args_true_target.marker_size = 30;
+args_true_target.marker_edge_color = [0, 0, 0];
+args_true_target.marker_face_color = color_list.true;
 for iAgents = 1:num_agents
-    args_target_true.txt = num2str(iAgents);
+    args_true_target.txt = num2str(iAgents);
     v_agents_true_(iAgents).visualizeAgentTrajectoryCustomized(args_true_trajectory);
-    plot_true = v_agents_true_(iAgents).visualizeAgentPositionCustomized(num_steps, args_target_true);
+    plot_true = v_agents_true_(iAgents).visualizeAgentPositionCustomized(num_steps, args_true_target);
 end
 % Reference agent
 args_ref_trajectory.line_color = color_list.ref;
 args_ref_trajectory.line_style = '-';
 args_ref_trajectory.line_width = 0.3;
-args_target_ref.marker_symbol = '^';
-args_target_ref.marker_size = 30;
-args_target_ref.marker_edge_color = [0, 0, 0];
-args_target_ref.marker_face_color = color_list.ref;
-args_target_ref.txt = 'ref(0)';
+args_ref_target.marker_symbol = '^';
+args_ref_target.marker_size = 30;
+args_ref_target.marker_edge_color = [0, 0, 0];
+args_ref_target.marker_face_color = color_list.ref;
+args_ref_target.txt = 'ref(0)';
 v_agent_ref_.visualizeAgentTrajectoryCustomized(args_ref_trajectory);
-plot_ref =v_agent_ref_.visualizeAgentPositionCustomized(num_steps, args_target_ref);
+plot_ref =v_agent_ref_.visualizeAgentPositionCustomized(num_steps, args_ref_target);
 % Centralized Extended Information Filter
 args_ceif_trajectory.line_color = color_list.ceif;
 args_ceif_trajectory.line_style = '-';
@@ -44,6 +44,9 @@ network_.visualizeConnectedNetwork3DCustomized(args_v_network);
 axis equal
 grid on
 ax = gca;
+legend([plot_true plot_ref plot_ceif], ...
+    {'True positions', 'Reference satellite', 'CEIF'}, ...
+    'Location', 'northwest', 'FontSize', 12)
 xlabel('X [m]','FontSize',12)
 ylabel('Y [m]','FontSize',12)
 ylabel('Z [m]','FontSize',12)

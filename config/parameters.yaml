@@ -26,5 +26,10 @@ reference_agent:
     velocity: [0, 0, 0]
 
 initial_estimate:
-  sigma_position: 100
-  sigma_velocity: 1.0
+  sigma_position: 10
+  sigma_velocity: 0.1
+
+estimators:
+  initial_covariance:
+    sigma_position: 100
+    sigma_velocity: 10

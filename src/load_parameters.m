@@ -33,3 +33,6 @@ init_state_ref.velocity = transpose(cell2mat(params.reference_agent.initial_stat
 % Initial estimates
 initial_estimate_sigma.position = params.initial_estimate.sigma_position;
 initial_estimate_sigma.velocity = params.initial_estimate.sigma_velocity;
+
+% Estimator parameters
+initial_covariance = params.estimators.initial_covariance;

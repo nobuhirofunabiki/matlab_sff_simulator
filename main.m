@@ -12,9 +12,11 @@ restoredefaultpath
 addpath(genpath('../matlab_agent_handler'));
 addpath(genpath('../dynamics_model'));
 addpath(genpath('../sensor_model'));
+addpath(genpath('../state_estimation'));
 addpath(genpath('../matlab_network_manager'));
 addpath(genpath('../matlab_visualizer'));
 addpath(genpath('../common_utilities'));
+addpath(genpath('../matlab_multiagent_utility'));
 addpath(genpath('../YAMLMatlab_0.4.3'));
 
 run('src/load_parameters.m');
@@ -87,6 +89,23 @@ range_sensor_ = RangeMeasurementMultiAgentWithReference(args_range_sensor);
 
 % Estimators
 estimate_timer = 0.0;
+discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(0);
+init_state_vector = zeros(num_vars, 1);
+for iAgents = 1:num_agents
+    init_state_vector(2*num_dims*(iAgents-1)+1:2*num_dims*iAgents) ...
+        = initial_states_estimate(1:2*num_dims, iAgents);
+end
+% Estimators: Centralized Extended Information Filter
+args_ceif.num_variables             = num_vars;
+args_ceif.num_dimensions            = num_dims;
+args_ceif.num_agents                = num_agents;
+args_ceif.state_vector              = init_state_vector;
+args_ceif.process_noise_covmat      = zeros(num_vars, num_vars);
+args_ceif.sigma_position            = initial_covariance.sigma_position;
+args_ceif.sigma_velocity            = initial_covariance.sigma_velocity;
+args_ceif.discrete_system_matrix    = discrete_system_matrix;
+args_ceif.range_sensor              = args_range_sensor;
+estimator_ceif_ = EIF_3D_FormationEstimationByRangeAngleWithReference(args_ceif);
 
 % Visualizers
 args_visualizer.memory_size = num_steps;
@@ -152,6 +171,19 @@ for iSteps = 1:num_steps
         % Range measurements
         range_sensor_.computeMeasurementVector(true_positions, position_ref, true);
         measurements.ranges = range_sensor_.getMeasurements();
+
+        % Network
+        arg_adjacent_matrix.range = network_.getAdjacentMatrix();
+
+        % Sequential Estimation Phase
+        discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer);
+        % Centralized Extended Information Filter
+        estimator_ceif_.executeInformationFilter(measurements, discrete_system_matrix, arg_adjacent_matrix , position_ref);
+        state_vector_ceif = estimator_ceif_.getStateVector();
+        for iAgents = 1:num_agents
+            posvel = state_vector_ceif((2*num_dims)*(iAgents-1)+1:(2*num_dims)*iAgents, 1);
+            agents_ceif_(iAgents).setPositionVelocity(posvel);
+        end
 
         estimate_timer = 0.0;
     end

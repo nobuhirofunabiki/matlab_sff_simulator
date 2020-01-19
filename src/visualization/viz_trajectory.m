@@ -45,8 +45,8 @@ axis equal
 grid on
 ax = gca;
 legend([plot_true plot_ref plot_ceif], ...
-    {'True positions', 'Reference satellite', 'CEIF'}, ...
-    'Location', 'northwest', 'FontSize', 12)
+    {'True positions', 'Reference satellite', 'Estimated positions (CEIF)'}, ...
+    'Location', 'northwest', 'FontSize', 8)
 xlabel('X [m]','FontSize',12)
 ylabel('Y [m]','FontSize',12)
 ylabel('Z [m]','FontSize',12)

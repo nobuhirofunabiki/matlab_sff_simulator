@@ -195,6 +195,7 @@ for iSteps = 1:num_steps
         arg_adjacent_matrix.range = network_.getAdjacentMatrix();
 
         % Sequential Estimation Phase
+        % TODO: Precision assessment of non-constant discrete system matrix is required
         discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer);
         % Centralized Extended Information Filter
         estimator_ceif_.executeInformationFilter(measurements, discrete_system_matrix, arg_adjacent_matrix , position_ref);

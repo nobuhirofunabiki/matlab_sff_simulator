@@ -3,9 +3,9 @@ file_name:
   mesh_network: 'time_data_transfer.csv'
 
 time:
-  total_simulation: 30
-  delta_runge_kutta: 1
-  display_period: 10.0
+  total_simulation: 100
+  delta_runge_kutta: 0.1
+  display_period: 1.0
 
 dynamics:
   dimension: 3

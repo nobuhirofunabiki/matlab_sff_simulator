@@ -59,6 +59,13 @@ args_network.node_position_ref      = agent_ref_.getPosition();
 network_ = NetworkManagerWithReferenceNode(args_network);
 network_.updateAdjacentMatrixByRange();
 
+% Communication time
+iTimeTableRows = 1;
+estimation_period = sum(comm_time_table(iTimeTableRows,2:num_agents));
+
+% Estimators
+estimate_timer = 0.0;
+
 % Visualizers
 args_visualizer.memory_size = num_steps;
 % Visualization: True states
@@ -91,9 +98,22 @@ for iSteps = 1:num_steps
     network_.setNodePositions(node_positions, position_ref);
     network_.updateAdjacentMatrixByRange();
 
+    % Communication time table
+    % Update the estimation period based on the result of mesh_network_simulator
+    if time_stamp > comm_time_table(iTimeTableRows,1)
+        iTimeTableRows = iTimeTableRows + 1;
+        estimation_period = sum(comm_time_table(iTimeTableRows,2:num_agents));
+    end
+
+    % Estimation Sequence
+    if (estimate_timer >= estimation_period || iSteps == 1)
+        estimate_timer = 0.0;
+    end
+    estimate_timer = estimate_timer + delta_time_rk;
+
     % Timer
-    time_stamp = time_stamp + delta_time_rk;
     time_list(1,iSteps) = time_stamp;
+    time_stamp = time_stamp + delta_time_rk;
     display_timer = display_timer + delta_time_rk;
     if (display_timer >= display_period)
         disp(time_stamp);

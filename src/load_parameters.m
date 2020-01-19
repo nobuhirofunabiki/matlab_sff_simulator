@@ -4,7 +4,7 @@ params = ReadYaml('../config/parameters.yaml');
 
 % Load files
 initial_states = readmatrix(['../config/initial_states/', params.file_name.initial_states]);
-communication_time_table = readmatrix(['../config/mesh_network/', params.file_name.mesh_network]);
+comm_time_table = readmatrix(['../config/mesh_network/', params.file_name.mesh_network]);
 
 % General parameters
 num_agents = size(initial_states,2);

@@ -113,6 +113,20 @@ args_ceif.sigma_velocity            = initial_covariance.sigma_velocity;
 args_ceif.discrete_system_matrix    = discrete_system_matrix;
 args_ceif.range_sensor              = args_range_sensor;
 estimator_ceif_ = EIF_3D_FormationEstimationByRangeAngleWithReference(args_ceif);
+% Estimators: Decentralized Extended Information Filter
+args_deif.num_agents                = num_agents;
+args_deif.number_variables          = num_vars;
+args_deif.num_dimensions            = num_dims;
+args_deif.process_noise_covmat      = zeros(num_vars, num_vars);
+args_deif.discrete_system_matrix    = discrete_system_matrix;
+args_deif.sigma_position            = initial_covariance.sigma_position;
+args_deif.sigma_velocity            = initial_covariance.sigma_velocity;
+args_deif.state_vector              = init_state_vector;
+args_deif.range_sensor              = args_range_sensor;
+for iAgents = 1:num_agents
+    args_deif.agent_id = iAgents;
+    estimator_deif_(iAgents) = DEIF_3D_FormationEstimationByRangeAngleWithReference(args_deif);
+end
 
 % Visualizers
 args_visualizer.memory_size = num_steps;
@@ -204,6 +218,7 @@ for iSteps = 1:num_steps
     position_ref = agent_ref_.getPosition();
     network_.setNodePositions(node_positions, position_ref);
     network_.updateAdjacentMatrixByRange();
+    network_.updateStochasticAdjacencyMatrix();
 
     % Communication time table
     % Update the estimation period based on the result of mesh_network_simulator
@@ -232,12 +247,34 @@ for iSteps = 1:num_steps
         % Sequential Estimation Phase
         % TODO: Precision assessment of non-constant discrete system matrix is required
         discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer);
+
         % Centralized Extended Information Filter
         estimator_ceif_.executeInformationFilter(measurements, discrete_system_matrix, arg_adjacent_matrix , position_ref);
         state_vector_ceif = estimator_ceif_.getStateVector();
         for iAgents = 1:num_agents
             posvel = state_vector_ceif((2*num_dims)*(iAgents-1)+1:(2*num_dims)*iAgents, 1);
             agents_ceif_(iAgents).setPositionVelocity(posvel);
+        end
+
+        % Decentralized Extended Information Filter
+        Aij = network_.getStochasticAdjacencyMatrix();
+        for iAgents = 1:num_agents
+            outsource_info_vector = zeros(size(estimator_deif_(iAgents).getPreviousJointInformationVector()));
+            outsource_info_matrix = zeros(size(estimator_deif_(iAgents).getPreviousJointInformationMatrix()));
+            for jAgents = 1:num_agents
+                outsource_info_vector = outsource_info_vector ...
+                    + Aij(iAgents, jAgents)*estimator_deif_(jAgents).getPreviousJointInformationVector();
+                outsource_info_matrix = outsource_info_matrix ...
+                    + Aij(iAgents, jAgents)*estimator_deif_(jAgents).getPreviousJointInformationMatrix();
+            end
+            local_adjacent_matrix = network_.getLocalAdjacentMatrix(iAgents);
+            args_adjacent_matrix.range = local_adjacent_matrix;
+            estimator_deif_(iAgents).executeFiltering(measurements, discrete_system_matrix, args_adjacent_matrix, ...
+                outsource_info_vector, outsource_info_matrix, position_ref);
+            agents_deif_(iAgents).setStateVector(estimator_deif_(iAgents).getStateVector());
+        end
+        for iAgents = 1:num_agents
+            estimator_deif_(iAgents).updateEstimatorStatus();
         end
 
         estimate_timer = 0.0;

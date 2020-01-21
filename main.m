@@ -98,7 +98,7 @@ range_sensor_ = RangeMeasurementMultiAgentWithReference(args_range_sensor);
 args_angle_sensor.num_dimensions    = num_dims;
 args_angle_sensor.noise_sigma       = transpose(cell2mat(sensor_params.angle.noise_sigma));
 args_angle_sensor.num_agents        = num_agents;
-args_angle_sensor.num_measurements  = num_agents*(num_agents-1) + num_agents;
+args_angle_sensor.num_measurements  = 2*(num_agents*(num_agents-1) + num_agents);
 args_angle_sensor.num_variables     = num_vars;
 angle_sensor_ = AngleMeasurementMultiAgentWithReference3D(args_angle_sensor);
 
@@ -120,6 +120,7 @@ args_ceif.sigma_position            = initial_covariance.sigma_position;
 args_ceif.sigma_velocity            = initial_covariance.sigma_velocity;
 args_ceif.discrete_system_matrix    = discrete_system_matrix;
 args_ceif.range_sensor              = args_range_sensor;
+args_ceif.angle_sensor              = args_angle_sensor;
 estimator_ceif_ = EIF_3D_FormationEstimationByRangeAngleWithReference(args_ceif);
 % Estimators: Decentralized Extended Information Filter
 args_deif.num_agents                = num_agents;
@@ -248,9 +249,13 @@ for iSteps = 1:num_steps
         % Range measurements
         range_sensor_.computeMeasurementVector(true_positions, position_ref, true);
         measurements.ranges = range_sensor_.getMeasurements();
+        % Angle measurements
+        angle_sensor_.computeMeasurementVector(true_positions, position_ref, true);
+        measurements.angles = angle_sensor_.getMeasurements();
 
         % Network
         arg_adjacent_matrix.range = network_.getAdjacentMatrix();
+        arg_adjacent_matrix.angle = network_.getAdjacentMatrix();
 
         % Sequential Estimation Phase
         % TODO: Precision assessment of non-constant discrete system matrix is required

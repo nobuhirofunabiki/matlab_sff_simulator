@@ -87,12 +87,20 @@ iTimeTableRows = 1;
 estimation_period = sum(comm_time_table(iTimeTableRows,2:num_agents));
 
 % Sensor models
+% Range measurements
 args_range_sensor.noise_sigma       = sensor_params.range.noise_sigma;
 args_range_sensor.num_measures      = num_edges;
 args_range_sensor.num_variables     = num_vars;
 args_range_sensor.num_agents        = num_agents;
 args_range_sensor.num_dimensions    = num_dims;
 range_sensor_ = RangeMeasurementMultiAgentWithReference(args_range_sensor);
+% Angle measurements
+args_angle_sensor.num_dimensions    = num_dims;
+args_angle_sensor.noise_sigma       = transpose(cell2mat(sensor_params.angle.noise_sigma));
+args_angle_sensor.num_agents        = num_agents;
+args_angle_sensor.num_measurements  = num_agents*(num_agents-1) + num_agents;
+args_angle_sensor.num_variables     = num_vars;
+angle_sensor_ = AngleMeasurementMultiAgentWithReference3D(args_angle_sensor);
 
 % Estimators
 estimate_timer = 0.0;

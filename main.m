@@ -132,6 +132,7 @@ args_deif.sigma_position            = initial_covariance.sigma_position;
 args_deif.sigma_velocity            = initial_covariance.sigma_velocity;
 args_deif.state_vector              = init_state_vector;
 args_deif.range_sensor              = args_range_sensor;
+args_deif.angle_sensor              = args_angle_sensor;
 for iAgents = 1:num_agents
     args_deif.agent_id = iAgents;
     estimator_deif_(iAgents) = DEIF_3D_FormationEstimationByRangeAngleWithReference(args_deif);
@@ -254,15 +255,15 @@ for iSteps = 1:num_steps
         measurements.angles = angle_sensor_.getMeasurements();
 
         % Network
-        arg_adjacent_matrix.range = network_.getAdjacentMatrix();
-        arg_adjacent_matrix.angle = network_.getAdjacentMatrix();
+        args_adjacent_matrix.range = network_.getAdjacentMatrix();
+        args_adjacent_matrix.angle = network_.getAdjacentMatrix();
 
         % Sequential Estimation Phase
         % TODO: Precision assessment of non-constant discrete system matrix is required
         discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer);
 
         % Centralized Extended Information Filter
-        estimator_ceif_.executeInformationFilter(measurements, discrete_system_matrix, arg_adjacent_matrix , position_ref);
+        estimator_ceif_.executeInformationFilter(measurements, discrete_system_matrix, args_adjacent_matrix , position_ref);
         state_vector_ceif = estimator_ceif_.getStateVector();
         for iAgents = 1:num_agents
             posvel = state_vector_ceif((2*num_dims)*(iAgents-1)+1:(2*num_dims)*iAgents, 1);
@@ -282,6 +283,7 @@ for iSteps = 1:num_steps
             end
             local_adjacent_matrix = network_.getLocalAdjacentMatrix(iAgents);
             args_adjacent_matrix.range = local_adjacent_matrix;
+            args_adjacent_matrix.angle = local_adjacent_matrix;
             estimator_deif_(iAgents).executeFiltering(measurements, discrete_system_matrix, args_adjacent_matrix, ...
                 outsource_info_vector, outsource_info_matrix, position_ref);
             agents_deif_(iAgents).setStateVector(estimator_deif_(iAgents).getStateVector());

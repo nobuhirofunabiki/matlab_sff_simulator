@@ -1,13 +1,14 @@
 file_name:
-  initial_states: 'test.csv'
-  mesh_network: 'time_data_transfer.csv'
+  initial_states: 'sample_initial_states.csv'
+  mesh_network: 'sample_time_data_transfer.csv'
+  true_states: 'sample_sat_states_lvlh_all_dist.csv'
 
 time:
-  total_simulation: 100
-  delta_runge_kutta: 0.1
+  total_simulation: 1000
+  delta_runge_kutta: 1.0
   display_period: 10
   estimation:
-    b_use_mesh_network_simulator_output: false
+    b_use_mesh_network_simulator_output: true
     period: 1.0
 
 dynamics:
@@ -26,7 +27,12 @@ sensor:
   range:
     noise_sigma: 0.10
   angle:
-    noise_sigma: [0.05, 0.05]
+    noise_sigma: [0.01, 0.01]
+    # 30 arcsec
+    # noise_sigma: [0.0001454, 0.0001454]
+
+true_states:
+  b_read_from_csv: true
 
 reference_agent:
   initial_state:
@@ -34,7 +40,7 @@ reference_agent:
     velocity: [0, 0, 0]
 
 initial_estimate:
-  sigma_position: 10
+  sigma_position: 10.0
   sigma_velocity: 0.1
 
 estimators:

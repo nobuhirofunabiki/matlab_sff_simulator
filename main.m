@@ -32,11 +32,22 @@ num_vars        = 2*num_dims*num_agents;
 num_edges       = nchoosek(num_agents, 2) + num_agents;
 
 % True states
-for iAgents = 1:num_agents
-    args_agent_true.id = iAgents;
-    args_agent_true.position = initial_states(1:num_dims, iAgents);
-    args_agent_true.velocity = initial_states(1+num_dims:2*num_dims, iAgents);
-    agents_true_(iAgents) = AgentHandler(args_agent_true);
+if (b_read_true_state_from_csv)
+    for iAgents = 1:num_agents
+        true_states(iAgents).position = transpose(table2array(data_true_states(:,2+6*(iAgents-1):4+6*(iAgents-1))));
+        true_states(iAgents).velocity = transpose(table2array(data_true_states(:,5+6*(iAgents-1):7+6*(iAgents-1))));
+        args_agent_true.id = iAgents;
+        args_agent_true.position = true_states(iAgents).position(:,1);
+        args_agent_true.velocity = true_states(iAgents).velocity(:,1);
+        agents_true_(iAgents) = AgentHandler(args_agent_true);
+    end
+else
+    for iAgents = 1:num_agents
+        args_agent_true.id = iAgents;
+        args_agent_true.position = initial_states(1:num_dims, iAgents);
+        args_agent_true.velocity = initial_states(1+num_dims:2*num_dims, iAgents);
+        agents_true_(iAgents) = AgentHandler(args_agent_true);
+    end
 end
 
 % Reference agent
@@ -66,16 +77,12 @@ if (b_use_deif)
     end
 end
 
-
 % Dynamics model
 args_dynamics.discrete_time = delta_time_rk;
 args_dynamics.disturbance   = disturbance_sigma;
 args_dynamics.delta_time_rk = delta_time_rk;
 args_dynamics.angular_rate  = angular_rate;
 dynamics_ = HillDynamics3D(args_dynamics);
-args_dynamics.angular_rate  = angular_rate*0.999;
-% args_dynamics.angular_rate  = angular_rate;
-dynamics_2_ = HillDynamics3D(args_dynamics);
 
 % Network manager
 node_positions = zeros(num_dims, num_agents);
@@ -356,14 +363,17 @@ for iSteps = 1:num_steps
     % Propagation
     % Propagate the true state of agent by Runge-Kutta
     for iAgents = 1:num_agents
-        output = dynamics_2_.propagatePositionRungeKutta(...
+        if (b_read_true_state_from_csv)
+            agents_true_(iAgents).setPosition(true_states(iAgents).position(:,iSteps+1));
+            agents_true_(iAgents).setVelocity(true_states(iAgents).velocity(:,iSteps+1));
+        else
+            output = dynamics_.propagatePositionRungeKutta(...
             agents_true_(iAgents).getPosition(), agents_true_(iAgents).getVelocity(), control_input);
-        agents_true_(iAgents).setPositionVelocity(output);
-        % agents_true_(iAgents).setPosition(true_states(iAgents).position(:,iSteps+1));
-        % agents_true_(iAgents).setVelocity(true_states(iAgents).velocity(:,iSteps+1));
+            agents_true_(iAgents).setPositionVelocity(output);
+        end
     end
     % Propagation: Reference agent
-    output = dynamics_2_.propagatePositionRungeKutta(...
+    output = dynamics_.propagatePositionRungeKutta(...
         agent_ref_.getPosition(), agent_ref_.getVelocity(), control_input);
     agent_ref_.setPositionVelocity(output);
     % Propagation: Centralized Extended Information Filter

@@ -1,1 +1,7 @@
 output/*
+config/initial_states/*
+!config/initial_states/sample_initial_states.csv
+config/true_states/*
+!config/true_states/sample_sat_states_lvlh_all_dist.csv
+config/mesh_network/*
+!config/mesh_network/sample_time_data_transfer.csv

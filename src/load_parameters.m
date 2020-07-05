@@ -5,6 +5,7 @@ params = ReadYaml('../config/parameters.yaml');
 % Load files
 initial_states = readmatrix(['../config/initial_states/', params.file_name.initial_states]);
 comm_time_table = readmatrix(['../config/mesh_network/', params.file_name.mesh_network]);
+data_true_states = readtable(['../config/true_states/', params.file_name.true_states]);
 
 % General parameters
 num_agents = size(initial_states,2);
@@ -29,6 +30,9 @@ range_threshold.comm = params.network.range_threshold.communication;
 
 % Sensors
 sensor_params = params.sensor;
+
+% True states
+b_read_true_state_from_csv = params.true_states.b_read_from_csv;
 
 % Rerence agent
 init_state_ref.position = transpose(cell2mat(params.reference_agent.initial_state.position));

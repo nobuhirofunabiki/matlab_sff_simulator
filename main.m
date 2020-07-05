@@ -98,7 +98,9 @@ network_angle_ = NetworkManagerWithReferenceNode(args_network);
 
 % Communication time
 iTimeTableRows = 1;
-estimation_period = sum(comm_time_table(iTimeTableRows,2:num_agents));
+if (b_use_mesh_network_simulator_output)
+    estimation_period = sum(comm_time_table(iTimeTableRows,2:num_agents));
+end
 
 % Sensor models
 % Range measurements
@@ -272,9 +274,11 @@ for iSteps = 1:num_steps
 
     % Communication time table
     % Update the estimation period based on the result of mesh_network_simulator
-    if time_stamp > comm_time_table(iTimeTableRows,1)
-        iTimeTableRows = iTimeTableRows + 1;
-        estimation_period = sum(comm_time_table(iTimeTableRows,2:num_agents));
+    if (b_use_mesh_network_simulator_output)
+        if time_stamp > comm_time_table(iTimeTableRows,1)
+            iTimeTableRows = iTimeTableRows + 1;
+            estimation_period = sum(comm_time_table(iTimeTableRows,2:num_agents));
+        end
     end
 
     % Estimation Sequence

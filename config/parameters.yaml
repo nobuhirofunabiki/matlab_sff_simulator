@@ -5,7 +5,10 @@ file_name:
 time:
   total_simulation: 100
   delta_runge_kutta: 0.1
-  display_period: 1.0
+  display_period: 10
+  estimation:
+    b_use_mesh_network_simulator_output: false
+    period: 1.0
 
 dynamics:
   dimension: 3

@@ -7,7 +7,7 @@ for iAgents = 1:num_agents
         strcat('sc',num,'.x [m]'),...
         strcat('sc',num,'.y [m]'),...
         strcat('sc',num,'.z [m]')};
-    fprintf(fid, '%s, %s, %s,', str{:});
+    fprintf(fid, '%s,%s,%s,', str{:});
 end
 fprintf(fid,'\n');
 fclose(fid);
@@ -20,7 +20,7 @@ fclose(fid);
 % end
 
 data = [];
-time_delta = 1;
+time_delta = 100;
 for iSteps = 1:num_steps
     if (iSteps == 1 || mod(time_list(iSteps), time_delta) == 0)
         delta_data = zeros(1,1+num_dims*num_agents);

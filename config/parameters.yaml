@@ -41,3 +41,8 @@ estimators:
   b_use:
     centralized_extended_information_filter: true
     decentralized_extended_information_filter: false
+  deif:
+    wait_steps: 1
+  process_noise:
+    sigma_position: 0.01
+    sigma_velocity: 0.001

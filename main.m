@@ -89,15 +89,12 @@ args_network.node_position_ref      = agent_ref_.getPosition();
 % Communication network
 args_network.range_threshold = range_threshold.comm;
 network_comm_ = NetworkManagerWithReferenceNode(args_network);
-% network_comm_.updateAdjacentMatrixByRange();
 % Range measurement network
 args_network.range_threshold = range_threshold.range;
 network_range_ = NetworkManagerWithReferenceNode(args_network);
-% network_range_.updateAdjacentMatrixByRange();
 % Angle measurement network
 args_network.range_threshold = range_threshold.angle;
 network_angle_ = NetworkManagerWithReferenceNode(args_network);
-% network_angle_.updateAdjacentMatrixByRange();
 
 % Communication time
 iTimeTableRows = 1;
@@ -133,8 +130,7 @@ if (b_use_ceif)
     args_ceif.num_dimensions            = num_dims;
     args_ceif.num_agents                = num_agents;
     args_ceif.state_vector              = init_state_vector;
-    % args_ceif.process_noise_covmat      = zeros(num_vars, num_vars);
-    args_ceif.process_noise_covmat      = eye(num_vars)*0.02;
+    args_ceif.process_noise_covmat      = process_noise_covmat;
     args_ceif.sigma_position            = initial_covariance.sigma_position;
     args_ceif.sigma_velocity            = initial_covariance.sigma_velocity;
     args_ceif.discrete_system_matrix    = discrete_system_matrix;
@@ -147,17 +143,16 @@ if (b_use_deif)
     args_deif.num_agents                = num_agents;
     args_deif.number_variables          = num_vars;
     args_deif.num_dimensions            = num_dims;
-    % args_deif.process_noise_covmat      = zeros(num_vars, num_vars);
-    args_deif.process_noise_covmat      = eye(num_vars)*0.02;
+    args_deif.process_noise_covmat      = process_noise_covmat;
     args_deif.discrete_system_matrix    = discrete_system_matrix;
     args_deif.sigma_position            = initial_covariance.sigma_position;
     args_deif.sigma_velocity            = initial_covariance.sigma_velocity;
     args_deif.state_vector              = init_state_vector;
-    args_range_sensor.noise_sigma = args_range_sensor.noise_sigma*10;
-    args_angle_sensor.noise_sigma = args_angle_sensor.noise_sigma*10;
+    args_range_sensor.noise_sigma       = args_range_sensor.noise_sigma;
+    args_angle_sensor.noise_sigma       = args_angle_sensor.noise_sigma;
     args_deif.range_sensor              = args_range_sensor;
     args_deif.angle_sensor              = args_angle_sensor;
-    args_deif.wait_steps                = 3;
+    args_deif.wait_steps                = deif_wait_steps;
     for iAgents = 1:num_agents
         args_deif.agent_id = iAgents;
         estimator_deif_(iAgents) = DEIF_3D_FormationEstimationByRangeAngleWithReference(args_deif);

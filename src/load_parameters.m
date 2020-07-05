@@ -40,3 +40,13 @@ initial_estimate_sigma.velocity = params.initial_estimate.sigma_velocity;
 initial_covariance = params.estimators.initial_covariance;
 b_use_ceif = params.estimators.b_use.centralized_extended_information_filter;
 b_use_deif = params.estimators.b_use.decentralized_extended_information_filter;
+deif_wait_steps = params.estimators.deif.wait_steps;
+process_noise_covmat = zeros(2*num_dims*num_agents, 2*num_dims*num_agents);
+for iAgents = 1:num_agents
+    for iDims = 1:num_dims
+        process_noise_covmat(2*num_dims*(iAgents-1)+iDims, 2*num_dims*(iAgents-1)+iDims) ...
+            = params.estimators.process_noise.sigma_position;
+            process_noise_covmat(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) ...
+            = params.estimators.process_noise.sigma_velocity;
+    end
+end

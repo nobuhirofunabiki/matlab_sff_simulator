@@ -1,27 +1,48 @@
 figure
-[plot_ceif_mean, plot_ceif_var] = analysis_ceif_.visualizePositionErrorWithMeanAndVariance(time_list, color_list.ceif, '-', 1.0);
-[plot_deif_mean, plot_deif_var] = analysis_deif_(1).visualizePositionErrorWithMeanAndVariance(time_list, color_list.deif, '-', 1.0);
+if b_use_ceif
+    [plot_ceif_mean, plot_ceif_var] = analysis_ceif_.visualizePositionErrorWithMeanAndVariance(time_list, color_list.ceif, '-', 1.0);
+end
+if b_use_deif
+    [plot_deif_mean, plot_deif_var] = analysis_deif_(1).visualizePositionErrorWithMeanAndVariance(time_list, color_list.deif, '-', 1.0);
+end
 set(gca,'FontSize',10);
 ax = gca;
 grid on
-legend([plot_ceif_mean plot_ceif_var plot_deif_mean plot_deif_var], ...
-    {'Centralized EIF (mean)', 'Centralized EIF (variance)', ...
-    'Decentralized EIF (mean)', 'Decentralized EIF (variance'}, ...
-    'Location', 'northwest', 'FontSize', 8)
+plots = [];
+plot_names = {};
+if (b_use_ceif)
+    plots = horzcat(plots, [plot_ceif_mean, plot_ceif_var]);
+    plot_names = horzcat(plot_names, {'CEIF (mean)', 'CEIF (variance)'});
+end
+if (b_use_deif)
+    plots = horzcat(plots, [plot_deif_mean plot_deif_var]);
+    plot_names = horzcat(plot_names, {'DEIF (mean)', 'DEIF (variance)'});
+end
+legend(plots, plot_names, 'Location', 'northwest', 'FontSize', 8);
 xlabel('Time [sec]','FontSize',12)
-ylabel('Position estimation error [m]','FontSize',12)
+ylabel('Estimation Error of Position [m]','FontSize',12)
 hold off
 
 figure
-[plot_ceif_mean, plot_ceif_var] = analysis_ceif_.visualizeVelocityErrorWithMeanAndVariance(time_list, color_list.ceif, '-', 1.0);
-[plot_deif_mean, plot_deif_var] = analysis_deif_(1).visualizeVelocityErrorWithMeanAndVariance(time_list, color_list.deif, '-', 1.0);
+if b_use_ceif
+    [plot_ceif_mean, plot_ceif_var] = analysis_ceif_.visualizeVelocityErrorWithMeanAndVariance(time_list, color_list.ceif, '-', 1.0);
+end
+if b_use_deif
+    [plot_deif_mean, plot_deif_var] = analysis_deif_(1).visualizeVelocityErrorWithMeanAndVariance(time_list, color_list.deif, '-', 1.0);
+end
 set(gca,'FontSize',10);
 ax = gca;
 grid on
-legend([plot_ceif_mean plot_ceif_var plot_deif_mean plot_deif_var], ...
-    {'Centralized EIF (mean)', 'Centralized EIF (variance)', ...
-    'Decentralized EIF (mean)', 'Decentralized EIF (variance'}, ...
-    'Location', 'northwest', 'FontSize', 8)
+plots = [];
+plot_names = {};
+if (b_use_ceif)
+    plots = horzcat(plots, [plot_ceif_mean, plot_ceif_var]);
+    plot_names = horzcat(plot_names, {'CEIF (mean)', 'CEIF (variance)'});
+end
+if (b_use_deif)
+    plots = horzcat(plots, [plot_deif_mean plot_deif_var]);
+    plot_names = horzcat(plot_names, {'DEIF (mean)', 'DEIF (variance)'});
+end
 xlabel('Time [sec]','FontSize',12)
-ylabel('Velocity estimation error [m/s]','FontSize',12)
+ylabel('Estimation Error of Velocity [m/s]','FontSize',12)
 hold off

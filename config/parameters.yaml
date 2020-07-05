@@ -36,5 +36,8 @@ initial_estimate:
 
 estimators:
   initial_covariance:
-    sigma_position: 100
-    sigma_velocity: 10
+    sigma_position: 100.0
+    sigma_velocity: 1.0
+  b_use:
+    centralized_extended_information_filter: true
+    decentralized_extended_information_filter: false

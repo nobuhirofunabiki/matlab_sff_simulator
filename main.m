@@ -49,17 +49,21 @@ agent_ref_ = AgentHandler(args_agent_ref);
 initial_states_estimate = makeInitialEstimate(...
     num_dims, initial_states, initial_estimate_sigma.position, initial_estimate_sigma.velocity, 0.0, 0.0);
 % Estimated states: Centralized Extended Information Filter
-for iAgents = 1:num_agents
-    args_est_ceif.id = iAgents;
-    args_est_ceif.position = initial_states_estimate(1:num_dims, iAgents);
-    args_est_ceif.velocity = initial_states_estimate(1+num_dims:2*num_dims, iAgents);
-    agents_ceif_(iAgents) = AgentHandler(args_est_ceif);
+if (b_use_ceif)
+    for iAgents = 1:num_agents
+        args_est_ceif.id = iAgents;
+        args_est_ceif.position = initial_states_estimate(1:num_dims, iAgents);
+        args_est_ceif.velocity = initial_states_estimate(1+num_dims:2*num_dims, iAgents);
+        agents_ceif_(iAgents) = AgentHandler(args_est_ceif);
+    end
 end
 % Estimated states: Decentralized Extended Information Filter
-args_est_deif.num_agents = num_agents;
-args_est_deif.num_dimensions = num_dims;
-for iAgents = 1:num_agents
-    agents_deif_(iAgents) = MultiAgentHandler(args_est_deif, initial_states_estimate);
+if (b_use_deif)
+    args_est_deif.num_agents = num_agents;
+    args_est_deif.num_dimensions = num_dims;
+    for iAgents = 1:num_agents
+        agents_deif_(iAgents) = MultiAgentHandler(args_est_deif, initial_states_estimate);
+    end
 end
 
 
@@ -124,31 +128,40 @@ for iAgents = 1:num_agents
         = initial_states_estimate(1:2*num_dims, iAgents);
 end
 % Estimators: Centralized Extended Information Filter
-args_ceif.num_variables             = num_vars;
-args_ceif.num_dimensions            = num_dims;
-args_ceif.num_agents                = num_agents;
-args_ceif.state_vector              = init_state_vector;
-args_ceif.process_noise_covmat      = zeros(num_vars, num_vars);
-args_ceif.sigma_position            = initial_covariance.sigma_position;
-args_ceif.sigma_velocity            = initial_covariance.sigma_velocity;
-args_ceif.discrete_system_matrix    = discrete_system_matrix;
-args_ceif.range_sensor              = args_range_sensor;
-args_ceif.angle_sensor              = args_angle_sensor;
-estimator_ceif_ = EIF_3D_FormationEstimationByRangeAngleWithReference(args_ceif);
+if (b_use_ceif)
+    args_ceif.num_variables             = num_vars;
+    args_ceif.num_dimensions            = num_dims;
+    args_ceif.num_agents                = num_agents;
+    args_ceif.state_vector              = init_state_vector;
+    % args_ceif.process_noise_covmat      = zeros(num_vars, num_vars);
+    args_ceif.process_noise_covmat      = eye(num_vars)*0.02;
+    args_ceif.sigma_position            = initial_covariance.sigma_position;
+    args_ceif.sigma_velocity            = initial_covariance.sigma_velocity;
+    args_ceif.discrete_system_matrix    = discrete_system_matrix;
+    args_ceif.range_sensor              = args_range_sensor;
+    args_ceif.angle_sensor              = args_angle_sensor;
+    estimator_ceif_ = EIF_3D_FormationEstimationByRangeAngleWithReference(args_ceif);
+end
 % Estimators: Decentralized Extended Information Filter
-args_deif.num_agents                = num_agents;
-args_deif.number_variables          = num_vars;
-args_deif.num_dimensions            = num_dims;
-args_deif.process_noise_covmat      = zeros(num_vars, num_vars);
-args_deif.discrete_system_matrix    = discrete_system_matrix;
-args_deif.sigma_position            = initial_covariance.sigma_position;
-args_deif.sigma_velocity            = initial_covariance.sigma_velocity;
-args_deif.state_vector              = init_state_vector;
-args_deif.range_sensor              = args_range_sensor;
-args_deif.angle_sensor              = args_angle_sensor;
-for iAgents = 1:num_agents
-    args_deif.agent_id = iAgents;
-    estimator_deif_(iAgents) = DEIF_3D_FormationEstimationByRangeAngleWithReference(args_deif);
+if (b_use_deif)
+    args_deif.num_agents                = num_agents;
+    args_deif.number_variables          = num_vars;
+    args_deif.num_dimensions            = num_dims;
+    % args_deif.process_noise_covmat      = zeros(num_vars, num_vars);
+    args_deif.process_noise_covmat      = eye(num_vars)*0.02;
+    args_deif.discrete_system_matrix    = discrete_system_matrix;
+    args_deif.sigma_position            = initial_covariance.sigma_position;
+    args_deif.sigma_velocity            = initial_covariance.sigma_velocity;
+    args_deif.state_vector              = init_state_vector;
+    args_range_sensor.noise_sigma = args_range_sensor.noise_sigma*10;
+    args_angle_sensor.noise_sigma = args_angle_sensor.noise_sigma*10;
+    args_deif.range_sensor              = args_range_sensor;
+    args_deif.angle_sensor              = args_angle_sensor;
+    args_deif.wait_steps                = 3;
+    for iAgents = 1:num_agents
+        args_deif.agent_id = iAgents;
+        estimator_deif_(iAgents) = DEIF_3D_FormationEstimationByRangeAngleWithReference(args_deif);
+    end
 end
 
 % Visualizers
@@ -160,14 +173,18 @@ end
 % Visualization: Reference agent
 v_agent_ref_ = AgentVisualizer3D(args_visualizer);
 % Visualization: Centralized Extended Information Filter
-for iAgents = 1:num_agents
-    v_ceif_(iAgents) =  AgentVisualizer3D(args_visualizer);
+if (b_use_ceif)
+    for iAgents = 1:num_agents
+        v_ceif_(iAgents) =  AgentVisualizer3D(args_visualizer);
+    end
 end
 % Visualization: Decentralized Extended Information Filter
-args_multi_visualizer.num_agents = num_agents;
-args_multi_visualizer.memory_size = num_steps;
-for iAgents = 1:num_agents
-    v_deif_(iAgents) = MultiAgentVisualizer3D(args_multi_visualizer);
+if (b_use_ceif)
+    args_multi_visualizer.num_agents = num_agents;
+    args_multi_visualizer.memory_size = num_steps;
+    for iAgents = 1:num_agents
+        v_deif_(iAgents) = MultiAgentVisualizer3D(args_multi_visualizer);
+    end
 end
 
 % Estimation Performance Analysis
@@ -176,10 +193,14 @@ args_analysis.memory_size      = num_steps;
 args_analysis.num_dimensions   = num_dims;
 args_analysis.chi2             = chi2inv(0.99, (2*num_dims)*num_agents);
 % Analysis: Centralized Extended Information Filter
-analysis_ceif_ = MultiEstimationAnalysisVisualizer(args_analysis);
+if (b_use_ceif)
+    analysis_ceif_ = MultiEstimationAnalysisVisualizer(args_analysis);
+end
 % Analysis: Decentralized Extended Information Filter
-for iAgents = 1:num_agents
-    analysis_deif_(iAgents) = MultiEstimationAnalysisVisualizer(args_analysis);
+if (b_use_deif)
+    for iAgents = 1:num_agents
+        analysis_deif_(iAgents) = MultiEstimationAnalysisVisualizer(args_analysis);
+    end
 end
 
 % Control input
@@ -199,37 +220,45 @@ for iSteps = 1:num_steps
     position = agent_ref_.getPosition();
     v_agent_ref_.setPosition(position, iSteps);
     % Visualization: Centralized Extended Information Filter
-    for iAgents = 1:num_agents
-        position = agents_ceif_(iAgents).getPosition();
-        v_ceif_(iAgents).setPosition(position, iSteps);
+    if (b_use_ceif)
+        for iAgents = 1:num_agents
+            position = agents_ceif_(iAgents).getPosition();
+            v_ceif_(iAgents).setPosition(position, iSteps);
+        end
     end
     % Visualization: Decentralized Extended Information Filter
-    for iAgents = 1:num_agents
-        for jAgents = 1:num_agents
-            position = agents_deif_(iAgents).getAgentPosition(jAgents);
-            v_deif_(iAgents).setPosition(jAgents, position, iSteps);
+    if (b_use_deif)
+        for iAgents = 1:num_agents
+            for jAgents = 1:num_agents
+                position = agents_deif_(iAgents).getAgentPosition(jAgents);
+                v_deif_(iAgents).setPosition(jAgents, position, iSteps);
+            end
         end
     end
 
     % Estimation Performance Analysis
     % Analysis: Centralized Extended Information Filter
-    for iAgents = 1:num_agents
-        analysis_ceif_.setEstimateErrorPositionScalar(iAgents, ...
-            agents_true_(iAgents).getPosition(), ...
-            agents_ceif_(iAgents).getPosition(), iSteps);
-        analysis_ceif_.setEstimateErrorVelocityScalar(iAgents, ...
-            agents_true_(iAgents).getVelocity(), ...
-            agents_ceif_(iAgents).getVelocity(), iSteps);
+    if (b_use_ceif)
+        for iAgents = 1:num_agents
+            analysis_ceif_.setEstimateErrorPositionScalar(iAgents, ...
+                agents_true_(iAgents).getPosition(), ...
+                agents_ceif_(iAgents).getPosition(), iSteps);
+            analysis_ceif_.setEstimateErrorVelocityScalar(iAgents, ...
+                agents_true_(iAgents).getVelocity(), ...
+                agents_ceif_(iAgents).getVelocity(), iSteps);
+        end
     end
     % Analysis: Decentralized Extended Information Filter
-    for iAgents = 1:num_agents
-        for jAgents = 1:num_agents
-            analysis_deif_(iAgents).setEstimateErrorPositionScalar(jAgents, ...
-                agents_true_(jAgents).getPosition(), ...
-                agents_deif_(iAgents).getAgentPosition(jAgents), iSteps);
-            analysis_deif_(iAgents).setEstimateErrorVelocityScalar(jAgents, ...
-                agents_true_(jAgents).getVelocity(), ...
-                agents_deif_(iAgents).getAgentVelocity(jAgents), iSteps);
+    if (b_use_deif)
+        for iAgents = 1:num_agents
+            for jAgents = 1:num_agents
+                analysis_deif_(iAgents).setEstimateErrorPositionScalar(jAgents, ...
+                    agents_true_(jAgents).getPosition(), ...
+                    agents_deif_(iAgents).getAgentPosition(jAgents), iSteps);
+                analysis_deif_(iAgents).setEstimateErrorVelocityScalar(jAgents, ...
+                    agents_true_(jAgents).getVelocity(), ...
+                    agents_deif_(iAgents).getAgentVelocity(jAgents), iSteps);
+            end
         end
     end
 
@@ -271,41 +300,45 @@ for iSteps = 1:num_steps
         measurements.angles = angle_sensor_.getMeasurements();
 
         % Network
-        args_adjacent_matrix.range = network_.getAdjacentMatrix();
-        args_adjacent_matrix.angle = network_.getAdjacentMatrix();
+        args_adjacent_matrix.range = network_range_.getAdjacentMatrix();
+        args_adjacent_matrix.angle = network_angle_.getAdjacentMatrix();
 
         % Sequential Estimation Phase
         % TODO: Precision assessment of non-constant discrete system matrix is required
         discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer);
 
         % Centralized Extended Information Filter
-        estimator_ceif_.executeInformationFilter(measurements, discrete_system_matrix, args_adjacent_matrix , position_ref);
-        state_vector_ceif = estimator_ceif_.getStateVector();
-        for iAgents = 1:num_agents
-            posvel = state_vector_ceif((2*num_dims)*(iAgents-1)+1:(2*num_dims)*iAgents, 1);
-            agents_ceif_(iAgents).setPositionVelocity(posvel);
+        if (b_use_ceif)
+            estimator_ceif_.executeInformationFilter(measurements, discrete_system_matrix, args_adjacent_matrix , position_ref);
+            state_vector_ceif = estimator_ceif_.getStateVector();
+            for iAgents = 1:num_agents
+                posvel = state_vector_ceif((2*num_dims)*(iAgents-1)+1:(2*num_dims)*iAgents, 1);
+                agents_ceif_(iAgents).setPositionVelocity(posvel);
+            end
         end
 
         % Decentralized Extended Information Filter
-        Aij = network_.getStochasticAdjacencyMatrix();
-        for iAgents = 1:num_agents
-            outsource_info_vector = zeros(size(estimator_deif_(iAgents).getPreviousJointInformationVector()));
-            outsource_info_matrix = zeros(size(estimator_deif_(iAgents).getPreviousJointInformationMatrix()));
-            for jAgents = 1:num_agents
-                outsource_info_vector = outsource_info_vector ...
-                    + Aij(iAgents, jAgents)*estimator_deif_(jAgents).getPreviousJointInformationVector();
-                outsource_info_matrix = outsource_info_matrix ...
-                    + Aij(iAgents, jAgents)*estimator_deif_(jAgents).getPreviousJointInformationMatrix();
+        if (b_use_deif)
+            Aij = network_comm_.getStochasticAdjacencyMatrix();
+            for iAgents = 1:num_agents
+                outsource_info_vector = zeros(size(estimator_deif_(iAgents).getPreviousJointInformationVector()));
+                outsource_info_matrix = zeros(size(estimator_deif_(iAgents).getPreviousJointInformationMatrix()));
+                for jAgents = 1:num_agents
+                    outsource_info_vector = outsource_info_vector ...
+                        + Aij(iAgents, jAgents)*estimator_deif_(jAgents).getPreviousJointInformationVector();
+                    outsource_info_matrix = outsource_info_matrix ...
+                        + Aij(iAgents, jAgents)*estimator_deif_(jAgents).getPreviousJointInformationMatrix();
+                end
+                % local_adjacent_matrix = network_.getLocalAdjacentMatrix(iAgents);
+                args_adjacent_matrix.range = network_range_.getLocalAdjacentMatrix(iAgents);
+                args_adjacent_matrix.angle = network_angle_.getLocalAdjacentMatrix(iAgents);
+                estimator_deif_(iAgents).executeFiltering(measurements, discrete_system_matrix, args_adjacent_matrix, ...
+                    outsource_info_vector, outsource_info_matrix, position_ref);
+                agents_deif_(iAgents).setStateVector(estimator_deif_(iAgents).getStateVector());
             end
-            local_adjacent_matrix = network_.getLocalAdjacentMatrix(iAgents);
-            args_adjacent_matrix.range = local_adjacent_matrix;
-            args_adjacent_matrix.angle = local_adjacent_matrix;
-            estimator_deif_(iAgents).executeFiltering(measurements, discrete_system_matrix, args_adjacent_matrix, ...
-                outsource_info_vector, outsource_info_matrix, position_ref);
-            agents_deif_(iAgents).setStateVector(estimator_deif_(iAgents).getStateVector());
-        end
-        for iAgents = 1:num_agents
-            estimator_deif_(iAgents).updateEstimatorStatus();
+            for iAgents = 1:num_agents
+                estimator_deif_(iAgents).updateEstimatorStatus();
+            end
         end
 
         estimate_timer = 0.0;
@@ -324,28 +357,34 @@ for iSteps = 1:num_steps
     % Propagation
     % Propagate the true state of agent by Runge-Kutta
     for iAgents = 1:num_agents
-        output = dynamics_.propagatePositionRungeKutta(...
+        output = dynamics_2_.propagatePositionRungeKutta(...
             agents_true_(iAgents).getPosition(), agents_true_(iAgents).getVelocity(), control_input);
-        agents_true_(iAgents).setPositionVelocity(output);       
+        agents_true_(iAgents).setPositionVelocity(output);
+        % agents_true_(iAgents).setPosition(true_states(iAgents).position(:,iSteps+1));
+        % agents_true_(iAgents).setVelocity(true_states(iAgents).velocity(:,iSteps+1));
     end
     % Propagation: Reference agent
-    output = dynamics_.propagatePositionRungeKutta(...
+    output = dynamics_2_.propagatePositionRungeKutta(...
         agent_ref_.getPosition(), agent_ref_.getVelocity(), control_input);
     agent_ref_.setPositionVelocity(output);
     % Propagation: Centralized Extended Information Filter
-    for iAgents = 1:num_agents
-        output = dynamics_.propagatePositionRungeKutta(...
-            agents_ceif_(iAgents).getPosition(), agents_ceif_(iAgents).getVelocity(), control_input);
-        agents_ceif_(iAgents).setPositionVelocity(output);
+    if (b_use_ceif)
+        for iAgents = 1:num_agents
+            output = dynamics_.propagatePositionRungeKutta(...
+                agents_ceif_(iAgents).getPosition(), agents_ceif_(iAgents).getVelocity(), control_input);
+            agents_ceif_(iAgents).setPositionVelocity(output);
+        end
     end
     % Propagation: Decentralized Extended Information Filter
-    for iAgents = 1:num_agents
-        for jAgents = 1:num_agents
-            output = dynamics_.propagatePositionRungeKutta(...
-                agents_deif_(iAgents).getAgentPosition(jAgents), ...
-                agents_deif_(iAgents).getAgentVelocity(jAgents), ...
-                control_input);
-            agents_deif_(iAgents).setAgentPositionVelocity(jAgents, output);
+    if (b_use_deif)
+        for iAgents = 1:num_agents
+            for jAgents = 1:num_agents
+                output = dynamics_.propagatePositionRungeKutta(...
+                    agents_deif_(iAgents).getAgentPosition(jAgents), ...
+                    agents_deif_(iAgents).getAgentVelocity(jAgents), ...
+                    control_input);
+                agents_deif_(iAgents).setAgentPositionVelocity(jAgents, output);
+            end
         end
     end
 

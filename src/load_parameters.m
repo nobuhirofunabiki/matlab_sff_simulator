@@ -21,7 +21,9 @@ disturbance_sigma = transpose(cell2mat(params.dynamics.disturbance_sigma));
 angular_rate = params.dynamics.hill.angular_rate;
 
 % Communication network
-range_threshold = params.network.range_threshold;
+range_threshold.range = params.network.range_threshold.range_measurement;
+range_threshold.angle = params.network.range_threshold.angle_measurement;
+range_threshold.comm = params.network.range_threshold.communication;
 
 % Sensors
 sensor_params = params.sensor;

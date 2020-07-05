@@ -69,18 +69,31 @@ args_dynamics.disturbance   = disturbance_sigma;
 args_dynamics.delta_time_rk = delta_time_rk;
 args_dynamics.angular_rate  = angular_rate;
 dynamics_ = HillDynamics3D(args_dynamics);
+args_dynamics.angular_rate  = angular_rate*0.999;
+% args_dynamics.angular_rate  = angular_rate;
+dynamics_2_ = HillDynamics3D(args_dynamics);
 
 % Network manager
 node_positions = zeros(num_dims, num_agents);
 for iAgents = 1:num_agents
     node_positions(:,iAgents) = agents_true_(iAgents).getPosition();
 end
-args_network.range_threshold        = range_threshold;
+args_network.num_steps              = num_steps;
 args_network.num_nodes_nonref       = num_agents;
 args_network.node_positions_nonref  = node_positions;
 args_network.node_position_ref      = agent_ref_.getPosition();
-network_ = NetworkManagerWithReferenceNode(args_network);
-network_.updateAdjacentMatrixByRange();
+% Communication network
+args_network.range_threshold = range_threshold.comm;
+network_comm_ = NetworkManagerWithReferenceNode(args_network);
+% network_comm_.updateAdjacentMatrixByRange();
+% Range measurement network
+args_network.range_threshold = range_threshold.range;
+network_range_ = NetworkManagerWithReferenceNode(args_network);
+% network_range_.updateAdjacentMatrixByRange();
+% Angle measurement network
+args_network.range_threshold = range_threshold.angle;
+network_angle_ = NetworkManagerWithReferenceNode(args_network);
+% network_angle_.updateAdjacentMatrixByRange();
 
 % Communication time
 iTimeTableRows = 1;
@@ -226,9 +239,12 @@ for iSteps = 1:num_steps
         node_positions(:,iAgents) = agents_true_(iAgents).getPosition();
     end
     position_ref = agent_ref_.getPosition();
-    network_.setNodePositions(node_positions, position_ref);
-    network_.updateAdjacentMatrixByRange();
-    network_.updateStochasticAdjacencyMatrix();
+    network_comm_.setNodePositions(node_positions, position_ref);
+    network_range_.setNodePositions(node_positions, position_ref);
+    network_angle_.setNodePositions(node_positions, position_ref);
+    network_comm_.updateNetwork(iSteps, time_stamp);
+    network_range_.updateNetwork(iSteps, time_stamp);
+    network_angle_.updateNetwork(iSteps, time_stamp);
 
     % Communication time table
     % Update the estimation period based on the result of mesh_network_simulator

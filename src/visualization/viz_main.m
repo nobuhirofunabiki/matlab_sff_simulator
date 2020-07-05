@@ -7,3 +7,4 @@ color_list.deif     = color_generator_.getNormalizedRGB('purple');
 
 run('viz_trajectory.m');
 run('viz_estimation_performance.m');
+run('viz_network.m');

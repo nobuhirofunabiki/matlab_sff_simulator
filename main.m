@@ -146,6 +146,8 @@ if (b_use_ceif)
     args_ceif.discrete_system_matrix    = discrete_system_matrix;
     args_ceif.range_sensor              = args_range_sensor;
     args_ceif.angle_sensor              = args_angle_sensor;
+    args_ceif.ratio_range_noise         = ratio_noise_model.ceif.range;
+    args_ceif.ratio_angle_noise         = ratio_noise_model.ceif.angle;
     estimator_ceif_ = EIF_3D_FormationEstimationByRangeAngleWithReference(args_ceif);
 end
 % Estimators: Decentralized Extended Information Filter
@@ -158,10 +160,10 @@ if (b_use_deif)
     args_deif.sigma_position            = initial_covariance.sigma_position;
     args_deif.sigma_velocity            = initial_covariance.sigma_velocity;
     args_deif.state_vector              = init_state_vector;
-    args_range_sensor.noise_sigma       = args_range_sensor.noise_sigma;
-    args_angle_sensor.noise_sigma       = args_angle_sensor.noise_sigma;
     args_deif.range_sensor              = args_range_sensor;
     args_deif.angle_sensor              = args_angle_sensor;
+    args_deif.ratio_range_noise         = ratio_noise_model.deif.range;
+    args_deif.ratio_angle_noise         = ratio_noise_model.deif.angle;
     args_deif.wait_steps                = deif_wait_steps;
     for iAgents = 1:num_agents
         args_deif.agent_id = iAgents;
@@ -309,9 +311,6 @@ for iSteps = 1:num_steps
         % Network
         args_adjacent_matrix.range = network_range_.getAdjacentMatrix();
         args_adjacent_matrix.angle = network_angle_.getAdjacentMatrix();
-        % Sequential Estimation Phase
-        % TODO: Precision assessment of non-constant discrete system matrix is required
-        % discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer);
     end
 
     if (b_run_ceif || iSteps == 1)

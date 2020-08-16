@@ -16,8 +16,8 @@ delta_time_rk           = params.time.delta_runge_kutta;
 display_period          = params.time.display_period;
 num_steps               = round(total_simulation_time/delta_time_rk);
 b_use_mesh_network_simulator_output = params.time.estimation.b_use_mesh_network_simulator_output;
-estimation_period.ceif = params.time.estimation.period.ceif
-estimation_period.deif = params.time.estimation.period.deif
+estimation_period.ceif = params.time.estimation.period.ceif;
+estimation_period.deif = params.time.estimation.period.deif;
 
 % Dynamics parameters
 num_dims = params.dynamics.dimension;
@@ -47,6 +47,10 @@ initial_estimate_sigma.velocity = params.initial_estimate.sigma_velocity;
 initial_covariance = params.estimators.initial_covariance;
 b_use_ceif = params.estimators.b_use.centralized_extended_information_filter;
 b_use_deif = params.estimators.b_use.decentralized_extended_information_filter;
+ratio_noise_model.ceif.range = params.estimators.ceif.ratio_noise_model.range;
+ratio_noise_model.ceif.angle = params.estimators.ceif.ratio_noise_model.angle;
+ratio_noise_model.deif.range = params.estimators.deif.ratio_noise_model.range;
+ratio_noise_model.deif.angle = params.estimators.deif.ratio_noise_model.angle;
 deif_wait_steps = params.estimators.deif.wait_steps;
 process_noise_covmat = zeros(2*num_dims*num_agents, 2*num_dims*num_agents);
 for iAgents = 1:num_agents

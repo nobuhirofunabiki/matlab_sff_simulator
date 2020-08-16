@@ -51,9 +51,16 @@ estimators:
     sigma_velocity: 1.0
   b_use:
     centralized_extended_information_filter: true
-    decentralized_extended_information_filter: false
+    decentralized_extended_information_filter: true
+  ceif:
+    ratio_noise_model:
+      range: 100.0
+      angle: 100.0
   deif:
-    wait_steps: 1
+    wait_steps: 0
+    ratio_noise_model:
+      range: 100.0
+      angle: 100.0
   process_noise:
     sigma_position: 0.01
     sigma_velocity: 0.001

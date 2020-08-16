@@ -16,7 +16,8 @@ delta_time_rk           = params.time.delta_runge_kutta;
 display_period          = params.time.display_period;
 num_steps               = round(total_simulation_time/delta_time_rk);
 b_use_mesh_network_simulator_output = params.time.estimation.b_use_mesh_network_simulator_output;
-estimation_period       = params.time.estimation.period;
+estimation_period.ceif = params.time.estimation.period.ceif
+estimation_period.deif = params.time.estimation.period.deif
 
 % Dynamics parameters
 num_dims = params.dynamics.dimension;

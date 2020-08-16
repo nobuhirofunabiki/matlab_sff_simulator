@@ -126,7 +126,8 @@ args_angle_sensor.num_variables     = num_vars;
 angle_sensor_ = AngleMeasurementMultiAgentWithReference3D(args_angle_sensor);
 
 % Estimators
-estimate_timer = 0.0;
+estimate_timer.ceif = 0.0;
+estimate_timer.deif = 0.0;
 discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(0);
 init_state_vector = zeros(num_vars, 1);
 for iAgents = 1:num_agents
@@ -289,8 +290,9 @@ for iSteps = 1:num_steps
     end
 
     % Estimation Sequence
-    if (estimate_timer >= estimation_period || iSteps == 1)
-        
+    b_run_ceif = estimate_timer.ceif >= estimation_period.ceif;
+    b_run_deif = estimate_timer.deif >= estimation_period.deif;
+    if (b_run_ceif || b_run_deif || iSteps == 1)
         % Sensor measurments
         true_positions = zeros(num_dims*num_agents, 1);
         for iAgents = 1:num_agents
@@ -304,17 +306,18 @@ for iSteps = 1:num_steps
         % Angle measurements
         angle_sensor_.computeMeasurementVector(true_positions, position_ref, true);
         measurements.angles = angle_sensor_.getMeasurements();
-
         % Network
         args_adjacent_matrix.range = network_range_.getAdjacentMatrix();
         args_adjacent_matrix.angle = network_angle_.getAdjacentMatrix();
-
         % Sequential Estimation Phase
         % TODO: Precision assessment of non-constant discrete system matrix is required
-        discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer);
+        % discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer);
+    end
 
+    if (b_run_ceif || iSteps == 1)
         % Centralized Extended Information Filter
         if (b_use_ceif)
+            discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer.ceif);
             estimator_ceif_.executeInformationFilter(measurements, discrete_system_matrix, args_adjacent_matrix , position_ref);
             state_vector_ceif = estimator_ceif_.getStateVector();
             for iAgents = 1:num_agents
@@ -322,9 +325,13 @@ for iSteps = 1:num_steps
                 agents_ceif_(iAgents).setPositionVelocity(posvel);
             end
         end
+        estimate_timer.ceif = 0.0;
+    end
 
+    if (b_run_deif || iSteps == 1)
         % Decentralized Extended Information Filter
         if (b_use_deif)
+            discrete_system_matrix = dynamics_.getDiscreteSystemMatrixSpecificTimestep(estimate_timer.deif);
             Aij = network_comm_.getStochasticAdjacencyMatrix();
             for iAgents = 1:num_agents
                 outsource_info_vector = zeros(size(estimator_deif_(iAgents).getPreviousJointInformationVector()));
@@ -346,10 +353,11 @@ for iSteps = 1:num_steps
                 estimator_deif_(iAgents).updateEstimatorStatus();
             end
         end
-
-        estimate_timer = 0.0;
+        estimate_timer.deif = 0.0;
     end
-    estimate_timer = estimate_timer + delta_time_rk;
+
+    estimate_timer.ceif = estimate_timer.ceif + delta_time_rk;
+    estimate_timer.deif = estimate_timer.deif + delta_time_rk;
 
     % Timer
     time_list(1,iSteps) = time_stamp;

@@ -8,8 +8,10 @@ time:
   delta_runge_kutta: 1.0
   display_period: 10
   estimation:
-    b_use_mesh_network_simulator_output: true
-    period: 1.0
+    b_use_mesh_network_simulator_output: false
+    period:
+      ceif: 2.0
+      deif: 0.5
 
 dynamics:
   dimension: 3

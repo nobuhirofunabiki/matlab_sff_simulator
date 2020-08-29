@@ -43,7 +43,7 @@ if (b_use_ceif)
 end
 
 % Decentralized Extended Information Filter
-if (b_use_ceif)
+if (b_use_deif)
     args_deif_trajectory.line_color = color_list.deif;
     args_deif_trajectory.line_style = '-';
     args_deif_trajectory.line_width = 0.3;

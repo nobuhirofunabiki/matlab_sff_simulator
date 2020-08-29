@@ -52,12 +52,19 @@ ratio_noise_model.ceif.angle = params.estimators.ceif.ratio_noise_model.angle;
 ratio_noise_model.deif.range = params.estimators.deif.ratio_noise_model.range;
 ratio_noise_model.deif.angle = params.estimators.deif.ratio_noise_model.angle;
 deif_wait_steps = params.estimators.deif.wait_steps;
-process_noise_covmat = zeros(2*num_dims*num_agents, 2*num_dims*num_agents);
+process_noise_covmat.ceif = zeros(2*num_dims*num_agents, 2*num_dims*num_agents);
+process_noise_covmat.deif = zeros(2*num_dims*num_agents, 2*num_dims*num_agents);
 for iAgents = 1:num_agents
     for iDims = 1:num_dims
-        process_noise_covmat(2*num_dims*(iAgents-1)+iDims, 2*num_dims*(iAgents-1)+iDims) ...
-            = params.estimators.process_noise.sigma_position;
-            process_noise_covmat(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) ...
-            = params.estimators.process_noise.sigma_velocity;
+        % For centralized extended information filter
+        process_noise_covmat.ceif(2*num_dims*(iAgents-1)+iDims, 2*num_dims*(iAgents-1)+iDims) ...
+            = params.estimators.process_noise.sigma_position*(estimation_period.ceif);
+        process_noise_covmat.ceif(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) ...
+            = params.estimators.process_noise.sigma_velocity*(estimation_period.ceif);
+        % For decentralized extended information filter
+        process_noise_covmat.deif(2*num_dims*(iAgents-1)+iDims, 2*num_dims*(iAgents-1)+iDims) ...
+            = params.estimators.process_noise.sigma_position*(estimation_period.deif);
+        process_noise_covmat.deif(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) ...
+            = params.estimators.process_noise.sigma_velocity*(estimation_period.deif);
     end
 end

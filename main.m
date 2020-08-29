@@ -140,7 +140,7 @@ if (b_use_ceif)
     args_ceif.num_dimensions            = num_dims;
     args_ceif.num_agents                = num_agents;
     args_ceif.state_vector              = init_state_vector;
-    args_ceif.process_noise_covmat      = process_noise_covmat;
+    args_ceif.process_noise_covmat      = process_noise_covmat.ceif;
     args_ceif.sigma_position            = initial_covariance.sigma_position;
     args_ceif.sigma_velocity            = initial_covariance.sigma_velocity;
     args_ceif.discrete_system_matrix    = discrete_system_matrix;
@@ -155,7 +155,7 @@ if (b_use_deif)
     args_deif.num_agents                = num_agents;
     args_deif.number_variables          = num_vars;
     args_deif.num_dimensions            = num_dims;
-    args_deif.process_noise_covmat      = process_noise_covmat;
+    args_deif.process_noise_covmat      = process_noise_covmat.deif;
     args_deif.discrete_system_matrix    = discrete_system_matrix;
     args_deif.sigma_position            = initial_covariance.sigma_position;
     args_deif.sigma_velocity            = initial_covariance.sigma_velocity;
@@ -186,7 +186,7 @@ if (b_use_ceif)
     end
 end
 % Visualization: Decentralized Extended Information Filter
-if (b_use_ceif)
+if (b_use_deif)
     args_multi_visualizer.num_agents = num_agents;
     args_multi_visualizer.memory_size = num_steps;
     for iAgents = 1:num_agents

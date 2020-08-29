@@ -12,15 +12,28 @@ plots = [];
 plot_names = {};
 if (b_use_ceif)
     plots = horzcat(plots, [plot_ceif_mean, plot_ceif_var]);
-    plot_names = horzcat(plot_names, {'CEIF (mean)', 'CEIF (variance)'});
+    if strcmp(language,'English')
+        plot_names = horzcat(plot_names, {'CEIF (mean)', 'CEIF (variance)'});
+    elseif strcmp(language,'Japanese')
+        plot_names = horzcat(plot_names, {'中央集権型 (期待値)', '中央集権型 (分散)'});
+    end
 end
 if (b_use_deif)
     plots = horzcat(plots, [plot_deif_mean plot_deif_var]);
-    plot_names = horzcat(plot_names, {'DEIF (mean)', 'DEIF (variance)'});
+    if strcmp(language,'English')
+        plot_names = horzcat(plot_names, {'DEIF (mean)', 'DEIF (variance)'});
+    elseif strcmp(language,'Japanese')
+        plot_names = horzcat(plot_names, {'分散型 (期待値)', '分散型 (分散)'});
+    end
 end
 legend(plots, plot_names, 'Location', 'northwest', 'FontSize', 8);
-xlabel('Time [sec]','FontSize',12)
-ylabel('Estimation Error of Position [m]','FontSize',12)
+if strcmp(language,'English')
+    xlabel('Time [sec]','FontSize',12)
+    ylabel('Estimation Error of Position [m]','FontSize',12)
+elseif strcmp(language,'Japanese')
+    xlabel('経過時間 [sec]','FontSize',12)
+    ylabel('相対位置推定誤差 [m]')
+end
 hold off
 
 figure
@@ -37,12 +50,26 @@ plots = [];
 plot_names = {};
 if (b_use_ceif)
     plots = horzcat(plots, [plot_ceif_mean, plot_ceif_var]);
-    plot_names = horzcat(plot_names, {'CEIF (mean)', 'CEIF (variance)'});
+    if strcmp(language,'English')
+        plot_names = horzcat(plot_names, {'CEIF (mean)', 'CEIF (variance)'});
+    elseif strcmp(language,'Japanese')
+        plot_names = horzcat(plot_names, {'中央集権型 (期待値)', '中央集権型 (分散)'});
+    end
 end
 if (b_use_deif)
     plots = horzcat(plots, [plot_deif_mean plot_deif_var]);
-    plot_names = horzcat(plot_names, {'DEIF (mean)', 'DEIF (variance)'});
+    if strcmp(language,'English')
+        plot_names = horzcat(plot_names, {'DEIF (mean)', 'DEIF (variance)'});
+    elseif strcmp(language,'Japanese')
+        plot_names = horzcat(plot_names, {'分散型 (期待値)', '分散型 (分散)'});
+    end
 end
-xlabel('Time [sec]','FontSize',12)
-ylabel('Estimation Error of Velocity [m/s]','FontSize',12)
+legend(plots, plot_names, 'Location', 'northwest', 'FontSize', 8);
+if strcmp(language,'English')
+    xlabel('Time [sec]','FontSize',12)
+    ylabel('Estimation Error of Velocity [m/s]','FontSize',12)
+elseif strcmp(language,'Japanese')
+    xlabel('経過時間 [sec]','FontSize',12)
+    ylabel('相対速度推定誤差 [m/s]')
+end
 hold off

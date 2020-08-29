@@ -20,9 +20,11 @@ fclose(fid);
 % end
 
 data = [];
-time_delta = 100;
+mod_list = zeros(1,num_steps);
+time_delta = 100.0;
 for iSteps = 1:num_steps
-    if (iSteps == 1 || mod(time_list(iSteps), time_delta) == 0)
+    mod_list(1,iSteps) = mod(time_list(iSteps), time_delta);
+    if (iSteps == 1 || (100.0 - mod(time_list(iSteps), time_delta)) < 0.1)
         delta_data = zeros(1,1+num_dims*num_agents);
         delta_data(1,1) = time_list(1,iSteps);
         for iAgents = 1:num_agents
